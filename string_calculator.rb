@@ -1,11 +1,11 @@
 class StringCalculator
   def add(input)
-    result = 0
+    return 0 if input == ""
+
     numbers_parser = NumbersParser.new(input)
-    numbers_parser.number_values.each do |value|
-      result += value
+    numbers_parser.number_values.reduce do |sum, value|
+      sum += value
     end
-    result
   end
 end
 
