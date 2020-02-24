@@ -48,5 +48,21 @@ describe StringCalculator do
         expect(result).to eq 3
       end
     end
+
+    context "with some negative values" do
+      it "raise an error" do
+        expect {
+          string_calculator.add("2,-3")
+        }.to raise_error NegativesNotAllowed
+      end
+    end
+
+    context "with some bigger value than 1000" do
+      it "are ignored an error" do
+        result = string_calculator.add("1,1000,1001")
+        
+        expect(result).to eq 1001
+      end
+    end
   end
 end

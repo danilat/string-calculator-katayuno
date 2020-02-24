@@ -1,15 +1,23 @@
 class StringCalculator
-  def add(input)
-    return 0 if input == ""
+  MAX_NUMBER_TO_USE = 1000
 
-    numbers_parser = NumbersParser.new(input)
-    numbers_parser.number_values.reduce do |sum, value|
-      sum += value
-    end
+  def add(input)
+    return 0 if input.empty?
+    
+    numbers_parser = PositiveNumbersParser.new(input)
+    AdderWithoutBigNumbers.new(numbers_parser.number_values, MAX_NUMBER_TO_USE).result
   end
 end
 
-class NumbersParser
+class AdderWithoutBigNumbers
+  attr_reader :result
+  def initialize(numbers, limit)
+    @result = numbers.select { |number| number <= limit }
+                     .reduce { |sum, number| sum += number }
+  end
+end
+
+class PositiveNumbersParser
   def initialize(input)
     if CustomValuesSeparator.custom?(input)
       @values_separator = CustomValuesSeparator.new(input)
@@ -19,8 +27,20 @@ class NumbersParser
   end
 
   def number_values
-    @values_separator.values.collect(&:to_i)
-  end  
+    @values_separator.values.collect do |value|
+      value = value.to_i
+      validate_positive_value!(value)
+
+      value
+    end
+  end
+
+  private def validate_positive_value!(value)
+    raise NegativesNotAllowed if value.negative?
+  end
+end
+
+class NegativesNotAllowed < StandardError
 end
 
 class CustomValuesSeparator
