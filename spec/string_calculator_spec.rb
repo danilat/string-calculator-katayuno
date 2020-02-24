@@ -1,47 +1,51 @@
 require "./string_calculator"
 
-describe "String calculator" do
+describe StringCalculator do
+  subject(:string_calculator) { described_class.new }
+
   context "empty string" do
     it "is zero" do
-      result = StringCalculator.new.add("")
+      result = string_calculator.add("")
 
       expect(result).to eq 0
     end
   end
   context "whitespace string" do
     it "is zero" do
-      result = StringCalculator.new.add(" ")
+      result = string_calculator.add(" ")
 
       expect(result).to eq 0
     end
   end
   context "one number" do
     it "return same value" do
-      result = StringCalculator.new.add("4")
+      result = string_calculator.add("4")
 
       expect(result).to eq 4
     end  
   end
-  context "two numbers" do
-    it "sum the values" do
-      result = StringCalculator.new.add("2,3")
-
-      expect(result).to(eq(5))
-    end
-
-    context "with two separators" do
+  context "two or more numbers" do
+    context "with the comma default separator" do
       it "sum the values" do
-        result = StringCalculator.new.add("1\n2,3")
+        result = string_calculator.add("2,3")
 
-        expect(result).to(eq(6))
+        expect(result).to eq 5
       end
     end
 
-    context "optional custom separator" do
+    context "with the two default separators" do
       it "sum the values" do
-        result = StringCalculator.new.add("//;\n1;2")
+        result = string_calculator.add("1\n2,3\n1")
 
-        expect(result).to(eq(3))
+        expect(result).to eq 7
+      end
+    end
+
+    context "with a custom separator" do
+      it "sum the values" do
+        result = string_calculator.add("//;\n1;2")
+
+        expect(result).to eq 3
       end
     end
   end
