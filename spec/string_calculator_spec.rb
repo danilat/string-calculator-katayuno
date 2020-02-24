@@ -58,7 +58,7 @@ describe StringCalculator do
     end
 
     context "with some bigger value than 1000" do
-      it "are ignored an error" do
+      it "are ignored in the sum" do
         result = string_calculator.add("1,1000,1001")
         
         expect(result).to eq 1001
