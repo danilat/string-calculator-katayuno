@@ -60,7 +60,15 @@ class CustomValuesSeparator
   end
 
   private def separator
-    @separator_and_numbers.split(CUSTOM_SEPARATOR_END)[0]
+    separator = @separator_and_numbers.split(CUSTOM_SEPARATOR_END)[0]
+    if multicharacter_separator?(separator)
+      separator = separator.slice(1..- 2)
+    end
+    separator
+  end
+
+  private def multicharacter_separator?(separator)
+    separator.start_with?("[") && separator.include?("]")
   end
 
   private def values_joined
