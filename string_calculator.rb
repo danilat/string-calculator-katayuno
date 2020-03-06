@@ -11,23 +11,23 @@ end
 
 class AdderWithoutBigNumbers
   attr_reader :result
-  def initialize(numbers, limit)
-    @result = numbers.select { |number| number <= limit }
+  def initialize(numbers, limit_number)
+    @result = numbers.select { |number| number <= limit_number }
                      .reduce { |sum, number| sum += number }
   end
 end
 
 class PositiveNumbersParser
   def initialize(input)
-    if CustomValuesSeparator.custom?(input)
-      @values_separator = CustomValuesSeparator.new(input)
+    if ValuesWithCustomSeparators.custom?(input)
+      @values_separator = ValuesWithCustomSeparators.new(input)
     else
-      @values_separator = DefaultValuesSeparator.new(input)
+      @values_separator = ValuesWithDefaultSeparators.new(input)
     end
   end
 
   def number_values
-    @values_separator.values.collect do |value|
+    @values_separator.run.collect do |value|
       value = value.to_i
       validate_positive_value!(value)
 
@@ -43,7 +43,7 @@ end
 class NegativesNotAllowed < StandardError
 end
 
-class CustomValuesSeparator
+class ValuesWithCustomSeparators
   CUSTOM_SEPARATOR_INIT = "//"
   CUSTOM_SEPARATOR_END = "\n"
 
@@ -55,7 +55,7 @@ class CustomValuesSeparator
     @separator_and_numbers = input.slice(CUSTOM_SEPARATOR_INIT.size..-1)
   end
 
-  def values
+  def run
     values_joined.split(separator)
   end
 
@@ -76,14 +76,14 @@ class CustomValuesSeparator
   end
 end
 
-class DefaultValuesSeparator
+class ValuesWithDefaultSeparators
   DEFAULT_SEPARATION = /[\n,]/
 
   def initialize(input)
     @input = input
   end
 
-  def values
+  def run
     @input.split(DEFAULT_SEPARATION)
   end
 end
