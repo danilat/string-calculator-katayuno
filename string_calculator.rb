@@ -4,8 +4,20 @@ class StringCalculator
   def add(input)
     return 0 if input.empty?
     
-    numbers_parser = PositiveNumbersParser.new(input)
+    numbers_parser = PositiveNumbersParser.new(values_separator_for(input))
     AdderWithoutBigNumbers.new(numbers_parser.number_values, MAX_NUMBER_TO_USE).result
+  end
+
+  def values_separator_for(input)
+    if custom_separators?(input)
+      ValuesWithCustomSeparator.new(input)
+    else
+      ValuesWithDefaultSeparator.new(input)
+    end
+  end
+
+  private def custom_separators?(input)
+    input.start_with?(ValuesWithCustomSeparator::CUSTOM_SEPARATOR_INIT) && input.include?(ValuesWithCustomSeparator::CUSTOM_SEPARATOR_END)
   end
 end
 
@@ -18,12 +30,8 @@ class AdderWithoutBigNumbers
 end
 
 class PositiveNumbersParser
-  def initialize(input)
-    if ValuesWithCustomSeparators.custom?(input)
-      @values_separator = ValuesWithCustomSeparators.new(input)
-    else
-      @values_separator = ValuesWithDefaultSeparators.new(input)
-    end
+  def initialize(values_separator)
+    @values_separator = values_separator
   end
 
   def number_values
@@ -43,40 +51,30 @@ end
 class NegativesNotAllowed < StandardError
 end
 
-class ValuesWithCustomSeparators
+class ValuesWithCustomSeparator
   CUSTOM_SEPARATOR_INIT = "//"
   CUSTOM_SEPARATOR_END = "\n"
-
-  def self.custom?(input)
-    input.start_with?(CUSTOM_SEPARATOR_INIT) && input.include?(CUSTOM_SEPARATOR_END)
-  end
+  MULTICHARACTER_SEPARATOR_INIT = "["
+  MULTICHARACTER_SEPARATOR_END = "]"
 
   def initialize(input)
-    @separator_and_numbers = input.slice(CUSTOM_SEPARATOR_INIT.size..-1)
+    custom_separator_and_values = input.slice(CUSTOM_SEPARATOR_INIT.size..-1)
+    custom_separator_and_values_parts = custom_separator_and_values.split(CUSTOM_SEPARATOR_END)
+    @custom_separator = custom_separator_and_values_parts[0]
+    @values_joined = custom_separator_and_values_parts[1]
   end
 
   def run
-    values_joined.split(separator)
+    separator = clean_multicharacter_separators(@custom_separator)
+    @values_joined.split(separator)
   end
 
-  private def separator
-    separator = @separator_and_numbers.split(CUSTOM_SEPARATOR_END)[0]
-    if multicharacter_separator?(separator)
-      separator = separator.slice(1..- 2)
-    end
-    separator
-  end
-
-  private def multicharacter_separator?(separator)
-    separator.start_with?("[") && separator.include?("]")
-  end
-
-  private def values_joined
-    @separator_and_numbers.split(CUSTOM_SEPARATOR_END)[1]
+  private def clean_multicharacter_separators(separator)
+    separator.delete_prefix(MULTICHARACTER_SEPARATOR_INIT).delete_suffix(MULTICHARACTER_SEPARATOR_END)
   end
 end
 
-class ValuesWithDefaultSeparators
+class ValuesWithDefaultSeparator
   DEFAULT_SEPARATION = /[\n,]/
 
   def initialize(input)
