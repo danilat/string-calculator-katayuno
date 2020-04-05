@@ -41,11 +41,35 @@ describe StringCalculator do
       end
     end
 
-    context "with a custom separator" do
+    context "with some negative values" do
+      it "raise an error" do
+        expect {
+          string_calculator.add("2,-3")
+        }.to raise_error NegativesNotAllowed
+      end
+    end
+
+    context "with some bigger value than 1000" do
+      it "are ignored in the sum" do
+        result = string_calculator.add("1,1000,1001")
+        
+        expect(result).to eq 1001
+      end
+    end
+
+    context "with a custom one character separator" do
       it "sum the values" do
         result = string_calculator.add("//;\n1;2")
 
         expect(result).to eq 3
+      end
+    end
+
+    context "with a custom multiple characters separator" do
+      it "sum the values" do
+        result = string_calculator.add("//[***]\n1***2***3")
+
+        expect(result).to eq 6
       end
     end
   end
