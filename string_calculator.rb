@@ -1,5 +1,11 @@
 class StringCalculator
   MAX_NUMBER_TO_USE = 1000
+  CUSTOM_SEPARATOR_INIT = "//"
+  CUSTOM_SEPARATOR_END = "\n"
+
+  def initialize
+    
+  end
 
   def add(input)
     return 0 if input.empty?
@@ -10,14 +16,15 @@ class StringCalculator
 
   def values_separator_for(input)
     if custom_separators?(input)
-      ValuesWithCustomSeparator.new(input)
+      separator_configuration = CustomSeparatorConfiguration.new(CUSTOM_SEPARATOR_INIT, CUSTOM_SEPARATOR_END)
+      ValuesWithCustomSeparator.new(input, separator_configuration)
     else
       ValuesWithDefaultSeparator.new(input)
     end
   end
 
   private def custom_separators?(input)
-    input.start_with?(ValuesWithCustomSeparator::CUSTOM_SEPARATOR_INIT) && input.include?(ValuesWithCustomSeparator::CUSTOM_SEPARATOR_END)
+    input.start_with?(CUSTOM_SEPARATOR_INIT) && input.include?(CUSTOM_SEPARATOR_END)
   end
 end
 
@@ -52,25 +59,44 @@ class NegativesNotAllowed < StandardError
 end
 
 class ValuesWithCustomSeparator
-  CUSTOM_SEPARATOR_INIT = "//"
-  CUSTOM_SEPARATOR_END = "\n"
   MULTICHARACTER_SEPARATOR_INIT = "["
   MULTICHARACTER_SEPARATOR_END = "]"
 
-  def initialize(input)
-    custom_separator_and_values = input.slice(CUSTOM_SEPARATOR_INIT.size..-1)
-    custom_separator_and_values_parts = custom_separator_and_values.split(CUSTOM_SEPARATOR_END)
-    @custom_separator = custom_separator_and_values_parts[0]
-    @values_joined = custom_separator_and_values_parts[1]
+  def initialize(input, separator_configuration)
+    custom_separator_and_values = input.delete_prefix(separator_configuration.start)
+    @custom_separator_and_values_parts = custom_separator_and_values.split(separator_configuration.end)
   end
 
   def run
+    @custom_separator = @custom_separator_and_values_parts[0]
+    @values_joined = @custom_separator_and_values_parts[1]
     separator = clean_multicharacter_separators(@custom_separator)
     @values_joined.split(separator)
   end
 
+  private def custom_separator_and_values_parts
+    custom_separator_and_values = @input.delete_prefix(@separator_configuration.start)
+    custom_separator_and_values.split(@separator_configuration.end)
+  end
+
   private def clean_multicharacter_separators(separator)
     separator.delete_prefix(MULTICHARACTER_SEPARATOR_INIT).delete_suffix(MULTICHARACTER_SEPARATOR_END)
+  end
+end
+
+class CustomSeparatorConfiguration
+  attr_reader :start, :end
+  def initialize(start_characters, end_characters)
+    @start = start_characters
+    @end = end_characters
+  end
+end
+
+class ArbitraryLengthSeparatorConfiguration
+  attr_reader :start, :end
+  def initialize(start_characters, end_characters)
+    @start = start_characters
+    @end = end_characters
   end
 end
 
